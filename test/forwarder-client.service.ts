@@ -55,6 +55,9 @@ export class ForwarderClientService {
     };
 
     try {
+      if (!this.forwarderUrl) {
+        throw new Error('Forwarder URL is not defined');
+      }
       // FIX APPLIED: Added <ForwarderResponse> generic type
       const observable = this.httpService.post<ForwarderResponse>(
         this.forwarderUrl,
