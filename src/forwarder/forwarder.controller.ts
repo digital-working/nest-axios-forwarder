@@ -12,6 +12,6 @@ export class ForwarderController {
 
   @Post('exec')
   async execute(@Body() execRequestDto: ExecRequestDto): Promise<any> {
-    return this.forwarderService.executeRequest(execRequestDto);
+    return await this.forwarderService.executeRequest(execRequestDto);
   }
 }
