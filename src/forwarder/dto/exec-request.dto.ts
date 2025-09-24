@@ -21,6 +21,8 @@ const VALID_METHODS: Method[] = [
 ];
 
 export class ExecRequestDto {
+  @IsOptional()
+  paramsSerializer?: (params: any) => string;
   @IsUrl({ require_protocol: true })
   url: string;
 

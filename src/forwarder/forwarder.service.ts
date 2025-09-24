@@ -50,6 +50,7 @@ export class ForwarderService {
       method: payload.method || 'GET',
       data: payload.body,
       params: payload.params, // Forward query parameters
+      paramsSerializer: payload.paramsSerializer,
       headers: this.stripHopByHopHeaders(payload.headers),
       timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
