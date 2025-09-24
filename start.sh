@@ -5,11 +5,11 @@ echo "Stashing changes..."
 git stash || echo "No changes to stash"
 git stash drop || echo "No stashes to drop"
 
-echo "Switch to main..."
-git switch main
+echo "Switch to development..."
+git switch development
 
-echo "Pulling latest code from main..."
-git pull origin main
+echo "Pulling latest code from development..."
+git pull origin development
 
 echo "Removing dist directory..."
 rm -rf dist 
