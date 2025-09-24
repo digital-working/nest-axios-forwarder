@@ -1,4 +1,12 @@
-import { IsIn, IsInt, IsObject, IsOptional, IsUrl, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsUrl,
+  Max,
+  Min,
+} from 'class-validator';
 // src/forwarder/dto/exec-request.dto.ts
 import type { Method } from 'axios';
 
@@ -23,7 +31,6 @@ export class ExecRequestDto {
   @IsOptional()
   @IsObject()
   headers?: Record<string, string>;
-
 
   @IsOptional()
   body?: unknown;
