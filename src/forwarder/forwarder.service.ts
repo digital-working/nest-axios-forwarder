@@ -56,6 +56,7 @@ export class ForwarderService {
       responseType: 'arraybuffer',
       maxContentLength: this.maxResponseBytes,
       validateStatus: () => true,
+      maxBodyLength: payload.maxBodyLength || this.maxResponseBytes,
     };
 
     try {
