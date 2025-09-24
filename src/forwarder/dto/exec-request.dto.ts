@@ -24,8 +24,12 @@ export class ExecRequestDto {
   @IsObject()
   headers?: Record<string, string>;
 
+
   @IsOptional()
   body?: unknown;
+
+  @IsOptional()
+  params?: any;
 
   @IsOptional()
   @IsInt()

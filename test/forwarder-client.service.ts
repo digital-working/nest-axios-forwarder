@@ -10,6 +10,7 @@ export interface ForwardRequest {
   url: string;
   method: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
+  params?: any;
   headers?: Record<string, string>; // The caller can now provide any headers.
 }
 
