@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
@@ -16,6 +17,7 @@ import { ExecRequestDto } from './dto/exec-request.dto';
 
 @Injectable()
 export class ForwarderService {
+  private readonly logger = new Logger(ForwarderService.name);
   private readonly allowedHosts: string[];
   private readonly defaultTimeout: number;
   private readonly maxResponseBytes: number;
@@ -80,7 +82,7 @@ export class ForwarderService {
           };
         } catch (error) {
           /* Fallback to base64 */
-          console.error(error);
+          this.logger.error('Failed to parse JSON response', error);
           throw error;
         }
       }
@@ -92,7 +94,7 @@ export class ForwarderService {
         bodyEncoding: 'base64',
       };
     } catch (error) {
-      console.error(error);
+      this.logger.error('Request execution failed', error);
       const err = error as AxiosError;
       throw new InternalServerErrorException({
         ok: false,
