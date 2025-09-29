@@ -47,6 +47,8 @@ export class ForwarderService {
       );
     }
     console.log(`Forwarding request to ${payload.url}`);
+    console.log(`Request params:`, payload.params);
+    console.log(`Request headers:`, payload.headers);
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
@@ -73,6 +75,12 @@ export class ForwarderService {
     const timeoutValue =
       payload.timeoutMs || payload.timeout || this.defaultTimeout;
     config.timeout = timeoutValue;
+    console.log('Final axios config:', {
+      url: config.url,
+      method: config.method,
+      params: config.params,
+      headers: config.headers
+    });
     try {
       const response = await axios.request(config);
       const responseBuffer = Buffer.from(response.data);
