@@ -88,6 +88,7 @@ export class ForwarderService {
         bodyEncoding: 'base64',
       };
     } catch (error) {
+      console.error(error);
       const err = error as AxiosError;
       throw new InternalServerErrorException({
         ok: false,
