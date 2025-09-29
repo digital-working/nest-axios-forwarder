@@ -3,6 +3,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { ForwarderModule } from './forwarder/forwarder.module';
+import { HttpLoggingInterceptor } from './forwarder/http-logging.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -13,6 +15,11 @@ import { ForwarderModule } from './forwarder/forwarder.module';
     ForwarderModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
