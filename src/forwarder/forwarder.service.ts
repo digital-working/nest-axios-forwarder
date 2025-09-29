@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import * as https from 'https';
 
 import type {
   ForwarderResponse,
@@ -63,6 +64,10 @@ export class ForwarderService {
         Number.isFinite(payload.maxBodyLength)
           ? (payload.maxBodyLength as number)
           : this.maxResponseBytes,
+      // Add HTTPS agent support for self-signed certificates
+      httpsAgent: payload.rejectUnauthorized === false 
+        ? new https.Agent({ rejectUnauthorized: false })
+        : undefined,
     };
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue =

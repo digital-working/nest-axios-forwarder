@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsIn,
   IsInt,
   IsObject,
@@ -54,4 +55,8 @@ export class ExecRequestDto {
 
   @IsOptional()
   maxBodyLength: number;
+
+  @IsOptional()
+  @IsBoolean()
+  rejectUnauthorized?: boolean;
 }
