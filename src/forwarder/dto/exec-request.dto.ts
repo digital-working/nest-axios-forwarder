@@ -1,4 +1,12 @@
-import { IsIn, IsInt, IsObject, IsOptional, IsUrl, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsUrl,
+  Max,
+  Min,
+} from 'class-validator';
 // src/forwarder/dto/exec-request.dto.ts
 import type { Method } from 'axios';
 
@@ -13,6 +21,8 @@ const VALID_METHODS: Method[] = [
 ];
 
 export class ExecRequestDto {
+  @IsOptional()
+  paramsSerializer?: (params: any) => string;
   @IsUrl({ require_protocol: true })
   url: string;
 
@@ -28,8 +38,14 @@ export class ExecRequestDto {
   body?: unknown;
 
   @IsOptional()
+  params?: any;
+
+  @IsOptional()
   @IsInt()
   @Min(100)
   @Max(120000)
   timeoutMs?: number;
+
+  @IsOptional()
+  maxBodyLength: number;
 }

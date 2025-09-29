@@ -49,11 +49,14 @@ export class ForwarderService {
       url: payload.url,
       method: payload.method || 'GET',
       data: payload.body,
+      params: payload.params, // Forward query parameters
+      paramsSerializer: payload.paramsSerializer,
       headers: this.stripHopByHopHeaders(payload.headers),
       timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
       maxContentLength: this.maxResponseBytes,
       validateStatus: () => true,
+      maxBodyLength: payload.maxBodyLength || this.maxResponseBytes,
     };
 
     try {
