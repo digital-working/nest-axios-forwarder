@@ -65,22 +65,12 @@ export class ForwarderService {
           : this.maxResponseBytes,
     };
     // Handle both timeout and timeoutMs for backward compatibility
-    const timeoutValue = payload.timeoutMs || payload.timeout || this.defaultTimeout;
+    const timeoutValue =
+      payload.timeoutMs || payload.timeout || this.defaultTimeout;
     config.timeout = timeoutValue;
     try {
       const response = await axios.request(config);
-      this.logger.log(
-        `Received response: ${response.status} ${response.statusText} for ${payload.method} ${payload.url}`,
-        response,
-      );
       const responseBuffer = Buffer.from(response.data);
-      this.logger.debug(
-        responseBuffer.length <= 1000
-          ? `Response data: ${responseBuffer.toString('utf8')}`
-          : `Response data (truncated): ${responseBuffer
-              .slice(0, 1000)
-              .toString('utf8')}... [truncated]`,
-      );
       const meta: ForwarderResponseMeta = {
         status: response.status,
         statusText: response.statusText,
@@ -108,8 +98,12 @@ export class ForwarderService {
         bodyBase64: responseBuffer.toString('base64'),
         bodyEncoding: 'base64',
       };
-    } catch (error) {
-      this.logger.error('Request execution failed', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error('Request execution failed', error);
+      } else {
+        this.logger.error('Request execution failed', new Error(String(error)));
+      }
       let errMsg = 'Unknown error';
       if (axios.isAxiosError(error)) {
         errMsg = error.message;
