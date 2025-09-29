@@ -12,6 +12,11 @@ export class ForwarderController {
 
   @Post('exec')
   async execute(@Body() execRequestDto: ExecRequestDto): Promise<any> {
-    return await this.forwarderService.executeRequest(execRequestDto);
+    try {
+      return await this.forwarderService.executeRequest(execRequestDto);
+    } catch (error) {
+      console.error('Error in ForwarderController execute method:', error);
+      throw error;
+    }
   }
 }

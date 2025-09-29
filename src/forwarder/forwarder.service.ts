@@ -45,27 +45,42 @@ export class ForwarderService {
         `Host for URL ${payload.url} is not allowed.`,
       );
     }
-
     console.log(`Forwarding request to ${payload.url}`);
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
       data: payload.body,
-      params: payload.params, // Forward query parameters
-      paramsSerializer: payload.paramsSerializer,
+      params: payload.params as Record<string, any> | undefined, // Forward query parameters
+      paramsSerializer:
+        payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
       headers: this.stripHopByHopHeaders(payload.headers),
       // timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
       maxContentLength: this.maxResponseBytes,
       validateStatus: () => true,
-      maxBodyLength: payload.maxBodyLength || this.maxResponseBytes,
+      maxBodyLength:
+        typeof payload.maxBodyLength === 'number' &&
+        Number.isFinite(payload.maxBodyLength)
+          ? (payload.maxBodyLength as number)
+          : this.maxResponseBytes,
     };
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue = payload.timeoutMs || payload.timeout || this.defaultTimeout;
     config.timeout = timeoutValue;
     try {
       const response = await axios.request(config);
+      this.logger.log(
+        `Received response: ${response.status} ${response.statusText} for ${payload.method} ${payload.url}`,
+        response,
+      );
       const responseBuffer = Buffer.from(response.data);
+      this.logger.debug(
+        responseBuffer.length <= 1000
+          ? `Response data: ${responseBuffer.toString('utf8')}`
+          : `Response data (truncated): ${responseBuffer
+              .slice(0, 1000)
+              .toString('utf8')}... [truncated]`,
+      );
       const meta: ForwarderResponseMeta = {
         status: response.status,
         statusText: response.statusText,
@@ -95,11 +110,16 @@ export class ForwarderService {
       };
     } catch (error) {
       this.logger.error('Request execution failed', error);
-      const err = error as AxiosError;
+      let errMsg = 'Unknown error';
+      if (axios.isAxiosError(error)) {
+        errMsg = error.message;
+      } else if (error instanceof Error) {
+        errMsg = error.message;
+      }
       throw new InternalServerErrorException({
         ok: false,
         error: 'REQUEST_EXECUTION_FAILED',
-        details: err.message,
+        details: errMsg,
       });
     }
   }
