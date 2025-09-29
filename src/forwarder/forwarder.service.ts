@@ -52,13 +52,15 @@ export class ForwarderService {
       params: payload.params, // Forward query parameters
       paramsSerializer: payload.paramsSerializer,
       headers: this.stripHopByHopHeaders(payload.headers),
-      timeout: payload.timeoutMs || this.defaultTimeout,
+      // timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
       maxContentLength: this.maxResponseBytes,
       validateStatus: () => true,
       maxBodyLength: payload.maxBodyLength || this.maxResponseBytes,
     };
-
+    if (payload.timeoutMs) {
+      config.timeout = payload.timeoutMs;
+    }
     try {
       const response = await axios.request(config);
       const responseBuffer = Buffer.from(response.data);
