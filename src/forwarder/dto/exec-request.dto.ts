@@ -47,5 +47,11 @@ export class ExecRequestDto {
   timeoutMs?: number;
 
   @IsOptional()
+  @IsInt()
+  @Min(100)
+  @Max(120000)
+  timeout?: number;
+
+  @IsOptional()
   maxBodyLength: number;
 }

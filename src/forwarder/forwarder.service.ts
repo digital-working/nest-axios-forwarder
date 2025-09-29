@@ -60,9 +60,9 @@ export class ForwarderService {
       validateStatus: () => true,
       maxBodyLength: payload.maxBodyLength || this.maxResponseBytes,
     };
-    if (payload.timeoutMs) {
-      config.timeout = payload.timeoutMs;
-    }
+    // Handle both timeout and timeoutMs for backward compatibility
+    const timeoutValue = payload.timeoutMs || payload.timeout || this.defaultTimeout;
+    config.timeout = timeoutValue;
     try {
       const response = await axios.request(config);
       const responseBuffer = Buffer.from(response.data);
