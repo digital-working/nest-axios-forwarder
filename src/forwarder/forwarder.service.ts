@@ -78,8 +78,10 @@ export class ForwarderService {
             meta,
             bodyJson: JSON.parse(responseBuffer.toString('utf8')),
           };
-        } catch {
+        } catch (error) {
           /* Fallback to base64 */
+          console.error(error);
+          throw error;
         }
       }
 
