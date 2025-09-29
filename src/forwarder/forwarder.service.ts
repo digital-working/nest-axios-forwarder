@@ -56,7 +56,10 @@ export class ForwarderService {
       params: payload.params as Record<string, any> | undefined, // Forward query parameters
       paramsSerializer:
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
-      headers: this.stripHopByHopHeaders(payload.headers),
+      headers: this.stripContentTypeForGetRequests(
+        this.stripHopByHopHeaders(payload.headers),
+        payload.method || 'GET'
+      ),
       // timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
       maxContentLength: this.maxResponseBytes,
@@ -163,6 +166,20 @@ export class ForwarderService {
       }
     }
     return result;
+  }
+
+  private stripContentTypeForGetRequests(headers: Record<string, string> = {}, method: string = 'GET') {
+    if (method.toUpperCase() === 'GET') {
+      const result = { ...headers };
+      // Remove Content-Type for GET requests as it can confuse some APIs like WHM
+      for (const header in result) {
+        if (header.toLowerCase() === 'content-type') {
+          delete result[header];
+        }
+      }
+      return result;
+    }
+    return headers;
   }
 
   private looksLikeJson(contentType?: string): boolean {
