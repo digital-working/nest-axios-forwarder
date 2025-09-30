@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import * as https from 'https';
+import * as qs from 'querystring';
 
 import type {
   ForwarderResponse,
@@ -49,10 +50,15 @@ export class ForwarderService {
     console.log(`Forwarding request to ${payload.url}`);
     console.log(`Request params:`, payload.params);
     console.log(`Request headers:`, payload.headers);
+    
+    // Process the request body based on content type
+    const processedBody = this.processRequestBody(payload.body, payload.headers);
+    console.log(`Processed body:`, processedBody);
+    
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
-      data: payload.body,
+      data: processedBody,
       params: payload.params as Record<string, any> | undefined, // Forward query parameters
       paramsSerializer:
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
@@ -82,7 +88,8 @@ export class ForwarderService {
       url: config.url,
       method: config.method,
       params: config.params,
-      headers: config.headers
+      headers: config.headers,
+      data: config.data
     });
     try {
       const response = await axios.request(config);
@@ -132,6 +139,28 @@ export class ForwarderService {
         details: errMsg,
       });
     }
+  }
+
+  private processRequestBody(body: unknown, headers: Record<string, string> = {}): unknown {
+    if (!body) {
+      return body;
+    }
+
+    const contentType = headers['content-type'] || headers['Content-Type'] || '';
+    
+    // If content type is application/x-www-form-urlencoded, serialize the body
+    if (contentType.toLowerCase().includes('application/x-www-form-urlencoded')) {
+      if (typeof body === 'object' && body !== null) {
+        // Convert object to URL-encoded string
+        return qs.stringify(body as Record<string, any>);
+      } else if (typeof body === 'string') {
+        // If it's already a string, return as is
+        return body;
+      }
+    }
+    
+    // For other content types, return body as is
+    return body;
   }
 
   // ... (rest of the helper methods are unchanged)
