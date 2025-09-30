@@ -50,11 +50,16 @@ export class ForwarderService {
     console.log(`Forwarding request to ${payload.url}`);
     console.log(`Request params:`, payload.params);
     console.log(`Request headers:`, payload.headers);
-    
+    console.log(`Request body:`, payload.body);
+    console.log(`Request body type:`, typeof payload.body);
+
     // Process the request body based on content type
-    const processedBody = this.processRequestBody(payload.body, payload.headers);
+    const processedBody = this.processRequestBody(
+      payload.body,
+      payload.headers,
+    );
     console.log(`Processed body:`, processedBody);
-    
+
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
@@ -64,7 +69,7 @@ export class ForwarderService {
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
       headers: this.stripContentTypeForGetRequests(
         this.stripHopByHopHeaders(payload.headers),
-        payload.method || 'GET'
+        payload.method || 'GET',
       ),
       // timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',
@@ -76,9 +81,10 @@ export class ForwarderService {
           ? (payload.maxBodyLength as number)
           : this.maxResponseBytes,
       // Add HTTPS agent support for self-signed certificates
-      httpsAgent: payload.rejectUnauthorized === false 
-        ? new https.Agent({ rejectUnauthorized: false })
-        : undefined,
+      httpsAgent:
+        payload.rejectUnauthorized === false
+          ? new https.Agent({ rejectUnauthorized: false })
+          : undefined,
     };
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue =
@@ -89,7 +95,7 @@ export class ForwarderService {
       method: config.method,
       params: config.params,
       headers: config.headers,
-      data: config.data
+      data: config.data,
     });
     try {
       const response = await axios.request(config);
@@ -141,25 +147,52 @@ export class ForwarderService {
     }
   }
 
-  private processRequestBody(body: unknown, headers: Record<string, string> = {}): unknown {
+  private processRequestBody(
+    body: unknown,
+    headers: Record<string, string> = {},
+  ): unknown {
+    console.log('processRequestBody called with body:', body);
+    console.log('processRequestBody body type:', typeof body);
+    console.log('processRequestBody body is null:', body === null);
+    console.log('processRequestBody body is undefined:', body === undefined);
+    console.log(
+      'processRequestBody body constructor:',
+      body?.constructor?.name,
+    );
+
     if (!body) {
+      console.log('Body is falsy, returning as is');
       return body;
     }
 
-    const contentType = headers['content-type'] || headers['Content-Type'] || '';
-    
+    const contentType =
+      headers['content-type'] || headers['Content-Type'] || '';
+    console.log('Content-Type detected:', contentType);
+
     // If content type is application/x-www-form-urlencoded, serialize the body
-    if (contentType.toLowerCase().includes('application/x-www-form-urlencoded')) {
-      if (typeof body === 'object' && body !== null) {
-        // Convert object to URL-encoded string
-        return qs.stringify(body as Record<string, any>);
+    if (
+      contentType.toLowerCase().includes('application/x-www-form-urlencoded')
+    ) {
+      console.log('Form URL encoded content type detected');
+
+      // Handle URLSearchParams objects
+      if (body instanceof URLSearchParams) {
+        console.log('Body is URLSearchParams, converting to string');
+        const result = body.toString();
+        console.log('URLSearchParams result:', result);
+        return result;
+      } else if (typeof body === 'object' && body !== null) {
+        console.log('Converting object body to URL-encoded string');
+        const result = qs.stringify(body as Record<string, any>);
+        console.log('URL-encoded result:', result);
+        return result;
       } else if (typeof body === 'string') {
-        // If it's already a string, return as is
+        console.log('Body is already a string, returning as is');
         return body;
       }
     }
-    
-    // For other content types, return body as is
+
+    console.log('Returning body unchanged');
     return body;
   }
 
@@ -197,7 +230,10 @@ export class ForwarderService {
     return result;
   }
 
-  private stripContentTypeForGetRequests(headers: Record<string, string> = {}, method: string = 'GET') {
+  private stripContentTypeForGetRequests(
+    headers: Record<string, string> = {},
+    method: string = 'GET',
+  ) {
     if (method.toUpperCase() === 'GET') {
       const result = { ...headers };
       // Remove Content-Type for GET requests as it can confuse some APIs like WHM
