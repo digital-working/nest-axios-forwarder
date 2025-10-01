@@ -1,19 +1,11 @@
 // src/forwarder/forwarder.service.ts
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as qs from 'querystring';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as https from 'https';
 
-import type {
-  ForwarderResponse,
-  ForwarderResponseMeta,
-} from './interfaces/forwarder-response.interface';
+import type { ForwarderResponse, ForwarderResponseMeta } from './interfaces/forwarder-response.interface';
 // Import the new interface
 import { ExecRequestDto } from './dto/exec-request.dto';
 
