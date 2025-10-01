@@ -47,7 +47,6 @@ export class ForwarderService {
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
-      data: processedBody,
       params: payload.params as Record<string, any> | undefined, // Forward query parameters
       paramsSerializer:
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
@@ -70,6 +69,9 @@ export class ForwarderService {
           ? new https.Agent({ rejectUnauthorized: false })
           : undefined,
     };
+    if (processedBody) {
+      config.data = processedBody;
+    }
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue =
       payload.timeoutMs || payload.timeout || this.defaultTimeout;
@@ -218,7 +220,7 @@ export class ForwarderService {
     headers: Record<string, string> = {},
     method: string = 'GET',
   ) {
-    if (method.toUpperCase() === 'GET') {
+    if (method?.toUpperCase() === 'GET') {
       const result = { ...headers };
       // Remove Content-Type for GET requests as it can confuse some APIs like WHM
       for (const header in result) {
