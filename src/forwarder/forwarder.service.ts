@@ -76,13 +76,7 @@ export class ForwarderService {
     const timeoutValue =
       payload.timeoutMs || payload.timeout || this.defaultTimeout;
     config.timeout = timeoutValue;
-    console.log('Final axios config:', {
-      url: config.url,
-      method: config.method,
-      params: config.params as Record<string, any> | undefined,
-      headers: config.headers,
-      data: config.data as unknown,
-    });
+    console.log('Final axios config:', config);
     try {
       const response = await axios.request(config);
       const responseBuffer = Buffer.from(response.data);
