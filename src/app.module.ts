@@ -1,10 +1,10 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
-import { ForwarderModule } from './forwarder/forwarder.module';
-import { HttpLoggingInterceptor } from './forwarder/http-logging.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+
+import { HttpLoggingInterceptor } from './forwarder/http-logging.interceptor';
+import { ForwarderModule } from './forwarder/forwarder.module';
 
 @Module({
   imports: [

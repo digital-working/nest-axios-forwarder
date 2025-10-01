@@ -1,19 +1,11 @@
 // src/forwarder/forwarder.service.ts
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import * as https from 'https';
 import * as qs from 'querystring';
+import axios, { AxiosRequestConfig } from 'axios';
+import * as https from 'https';
 
-import type {
-  ForwarderResponse,
-  ForwarderResponseMeta,
-} from './interfaces/forwarder-response.interface';
+import type { ForwarderResponse, ForwarderResponseMeta } from './interfaces/forwarder-response.interface';
 // Import the new interface
 import { ExecRequestDto } from './dto/exec-request.dto';
 
@@ -47,19 +39,11 @@ export class ForwarderService {
         `Host for URL ${payload.url} is not allowed.`,
       );
     }
-    console.log(`Forwarding request to ${payload.url}`);
-    console.log(`Request params:`, payload.params);
-    console.log(`Request headers:`, payload.headers);
-    console.log(`Request body:`, payload.body);
-    console.log(`Request body type:`, typeof payload.body);
-
     // Process the request body based on content type
     const processedBody = this.processRequestBody(
       payload.body,
       payload.headers,
     );
-    console.log(`Processed body:`, processedBody);
-
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
@@ -78,7 +62,7 @@ export class ForwarderService {
       maxBodyLength:
         typeof payload.maxBodyLength === 'number' &&
         Number.isFinite(payload.maxBodyLength)
-          ? (payload.maxBodyLength as number)
+          ? payload.maxBodyLength
           : this.maxResponseBytes,
       // Add HTTPS agent support for self-signed certificates
       httpsAgent:
@@ -93,9 +77,9 @@ export class ForwarderService {
     console.log('Final axios config:', {
       url: config.url,
       method: config.method,
-      params: config.params,
+      params: config.params as Record<string, any> | undefined,
       headers: config.headers,
-      data: config.data,
+      data: config.data as unknown,
     });
     try {
       const response = await axios.request(config);
