@@ -53,7 +53,7 @@ export class ForwarderService {
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
       headers: this.stripContentTypeForGetRequests(
         this.stripHopByHopHeaders(payload.headers),
-        payload.method || 'GET',
+        payload.method?.toUpperCase() || 'GET',
       ),
       // timeout: payload.timeoutMs || this.defaultTimeout,
       responseType: 'arraybuffer',

@@ -1,13 +1,4 @@
-import {
-  IsBoolean,
-  IsIn,
-  IsInt,
-  IsObject,
-  IsOptional,
-  IsUrl,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, IsUrl, Max, Min } from 'class-validator';
 // src/forwarder/dto/exec-request.dto.ts
 import type { Method } from 'axios';
 
@@ -24,7 +15,7 @@ const VALID_METHODS: Method[] = [
 export class ExecRequestDto {
   @IsOptional()
   paramsSerializer?: (params: any) => string;
-  @IsUrl({ require_protocol: true })
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   url: string;
 
   @IsOptional()
