@@ -90,7 +90,10 @@ export class ForwarderService {
         headers: response.headers, // This assignment is safe
       };
       console.log('response', response);
-      console.log('responseBuffer', responseBuffer);
+      console.log(
+        'responseBuffer',
+        JSON.parse(responseBuffer.toString('utf8')),
+      );
       const contentType = response.headers['content-type'] as string;
       if (this.looksLikeJson(contentType)) {
         try {
