@@ -47,9 +47,6 @@ export class ForwarderService {
     const config: AxiosRequestConfig = {
       url: payload.url,
       method: payload.method || 'GET',
-      params: payload.params as Record<string, any> | undefined, // Forward query parameters
-      paramsSerializer:
-        payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'],
       headers: this.stripContentTypeForGetRequests(
         this.stripHopByHopHeaders(payload.headers),
         payload.method?.toUpperCase() || 'GET',
@@ -63,14 +60,21 @@ export class ForwarderService {
         Number.isFinite(payload.maxBodyLength)
           ? payload.maxBodyLength
           : this.maxResponseBytes,
-      // Add HTTPS agent support for self-signed certificates
-      httpsAgent:
-        payload.rejectUnauthorized === false
-          ? new https.Agent({ rejectUnauthorized: false })
-          : undefined,
     };
     if (processedBody) {
       config.data = processedBody;
+    }
+    if (payload.params) {
+      config.params = payload.params as Record<string, any> | undefined; // Forward query parameters
+    }
+    if (payload.paramsSerializer) {
+      config.paramsSerializer =
+        payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'];
+    }
+    if (payload.rejectUnauthorized) {
+      config.httpsAgent = payload.rejectUnauthorized;
+    } else {
+      config.httpsAgent = new https.Agent({ rejectUnauthorized: false });
     }
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue =
