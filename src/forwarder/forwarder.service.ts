@@ -1,11 +1,19 @@
 // src/forwarder/forwarder.service.ts
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as qs from 'querystring';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as https from 'https';
 
-import type { ForwarderResponse, ForwarderResponseMeta } from './interfaces/forwarder-response.interface';
+import type {
+  ForwarderResponse,
+  ForwarderResponseMeta,
+} from './interfaces/forwarder-response.interface';
 // Import the new interface
 import { ExecRequestDto } from './dto/exec-request.dto';
 
@@ -89,6 +97,7 @@ export class ForwarderService {
         statusText: response.statusText,
         headers: response.headers, // This assignment is safe
       };
+      console.log('response', response);
 
       const contentType = response.headers['content-type'] as string;
       if (this.looksLikeJson(contentType)) {
