@@ -4,6 +4,7 @@ import {
   IsInt,
   IsObject,
   IsOptional,
+  IsString,
   IsUrl,
   Max,
   Min,
@@ -25,6 +26,7 @@ const VALID_METHODS: Method[] = [
 export class ExecRequestDto {
   @IsOptional()
   paramsSerializer?: (params: any) => string;
+
   @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   url: string;
 
@@ -64,5 +66,11 @@ export class ExecRequestDto {
   @IsOptional()
   httpsAgent?: https.Agent;
 
-  cert: any;
+  @IsOptional()
+  @IsString()
+  cert?: string;
+
+  @IsOptional()
+  @IsString()
+  key?: string;
 }
