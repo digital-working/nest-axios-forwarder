@@ -110,7 +110,7 @@ export class ForwarderService {
       };
       console.log('response status:', response.status);
       console.log('response headers:', response.headers);
-      
+
       const contentType = response.headers['content-type'] as string;
       if (this.looksLikeJson(contentType)) {
         try {
