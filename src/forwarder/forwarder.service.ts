@@ -108,18 +108,18 @@ export class ForwarderService {
         statusText: response.statusText,
         headers: response.headers, // This assignment is safe
       };
-      console.log('response', response);
-      console.log(
-        'responseBuffer',
-        JSON.parse(responseBuffer.toString('utf8')),
-      );
+      console.log('response status:', response.status);
+      console.log('response headers:', response.headers);
+      
       const contentType = response.headers['content-type'] as string;
       if (this.looksLikeJson(contentType)) {
         try {
+          const bodyJson = JSON.parse(responseBuffer.toString('utf8'));
+          console.log('Parsed JSON response:', bodyJson);
           return {
             ok: true,
             meta,
-            bodyJson: JSON.parse(responseBuffer.toString('utf8')),
+            bodyJson,
           };
         } catch (error) {
           /* Fallback to base64 */
@@ -128,6 +128,7 @@ export class ForwarderService {
         }
       }
 
+      console.log('Non-JSON response, returning as base64');
       return {
         ok: true,
         meta,
