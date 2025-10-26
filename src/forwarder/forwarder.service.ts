@@ -1,11 +1,19 @@
 // src/forwarder/forwarder.service.ts
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as qs from 'querystring';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as https from 'https';
 
-import type { ForwarderResponse, ForwarderResponseMeta } from './interfaces/forwarder-response.interface';
+import type {
+  ForwarderResponse,
+  ForwarderResponseMeta,
+} from './interfaces/forwarder-response.interface';
 // Import the new interface
 import { ExecRequestDto } from './dto/exec-request.dto';
 
@@ -65,16 +73,27 @@ export class ForwarderService {
       config.data = processedBody;
     }
     if (payload.params) {
-      config.params = payload.params as Record<string, any> | undefined; // Forward query parameters
+      // Convert URLSearchParams to plain object if needed
+      if (payload.params instanceof URLSearchParams) {
+        const paramsObj: Record<string, any> = {};
+        payload.params.forEach((value, key) => {
+          paramsObj[key] = value;
+        });
+        config.params = paramsObj;
+      } else {
+        config.params = payload.params as Record<string, any>;
+      }
     }
     if (payload.paramsSerializer) {
       config.paramsSerializer =
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'];
     }
-    if (payload.rejectUnauthorized) {
-      config.httpsAgent = payload.rejectUnauthorized;
+    // Handle httpsAgent - if provided, use it; otherwise create one based on rejectUnauthorized
+    if (payload.httpsAgent) {
+      config.httpsAgent = payload.httpsAgent;
     } else {
-      config.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+      const rejectUnauthorized = payload.rejectUnauthorized !== false; // default to true
+      config.httpsAgent = new https.Agent({ rejectUnauthorized });
     }
     // Handle both timeout and timeoutMs for backward compatibility
     const timeoutValue =

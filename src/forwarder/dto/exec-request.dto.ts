@@ -1,4 +1,13 @@
-import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, IsUrl, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsUrl,
+  Max,
+  Min,
+} from 'class-validator';
 // src/forwarder/dto/exec-request.dto.ts
 import type { Method } from 'axios';
 
@@ -50,4 +59,7 @@ export class ExecRequestDto {
   @IsOptional()
   @IsBoolean()
   rejectUnauthorized?: boolean;
+
+  @IsOptional()
+  httpsAgent?: any;
 }
