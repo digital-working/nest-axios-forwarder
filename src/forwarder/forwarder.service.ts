@@ -89,15 +89,25 @@ export class ForwarderService {
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'];
     }
     // Handle httpsAgent - create from cert data if provided
+    console.log('Checking cert/key fields:', {
+      hasCert: !!payload.cert,
+      hasKey: !!payload.key,
+      certLength: payload.cert?.length,
+      rejectUnauthorized: payload.rejectUnauthorized,
+    });
+
     if (payload.cert) {
+      console.log('Creating HTTPS agent with certificate');
       config.httpsAgent = new https.Agent({
         cert: payload.cert,
-        key: payload.cert, // Use key if provided, otherwise cert contains both
+        key: payload.key || payload.cert, // Use key if provided, otherwise cert contains both
         rejectUnauthorized: payload.rejectUnauthorized !== false,
       });
     } else if (payload.httpsAgent) {
+      console.log('Using provided httpsAgent');
       config.httpsAgent = payload.httpsAgent;
     } else {
+      console.log('Creating default HTTPS agent');
       const rejectUnauthorized = payload.rejectUnauthorized !== false; // default to true
       config.httpsAgent = new https.Agent({ rejectUnauthorized });
     }
