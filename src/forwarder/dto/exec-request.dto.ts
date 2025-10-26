@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 // src/forwarder/dto/exec-request.dto.ts
 import type { Method } from 'axios';
+import type * as https from 'https';
 
 const VALID_METHODS: Method[] = [
   'GET',
@@ -61,5 +62,7 @@ export class ExecRequestDto {
   rejectUnauthorized?: boolean;
 
   @IsOptional()
-  httpsAgent?: any;
+  httpsAgent?: https.Agent;
+
+  cert: any;
 }

@@ -88,8 +88,14 @@ export class ForwarderService {
       config.paramsSerializer =
         payload.paramsSerializer as AxiosRequestConfig['paramsSerializer'];
     }
-    // Handle httpsAgent - if provided, use it; otherwise create one based on rejectUnauthorized
-    if (payload.httpsAgent) {
+    // Handle httpsAgent - create from cert data if provided
+    if (payload.cert) {
+      config.httpsAgent = new https.Agent({
+        cert: payload.cert,
+        key: payload.cert, // Use key if provided, otherwise cert contains both
+        rejectUnauthorized: payload.rejectUnauthorized !== false,
+      });
+    } else if (payload.httpsAgent) {
       config.httpsAgent = payload.httpsAgent;
     } else {
       const rejectUnauthorized = payload.rejectUnauthorized !== false; // default to true
