@@ -128,25 +128,52 @@ export class ForwarderService {
       console.log('response headers:', response.headers);
 
       const contentType = response.headers['content-type'] as string;
-      if (this.looksLikeJson(contentType)) {
+      const isErrorStatus = response.status >= 400;
+      
+      // For error responses, always try to parse as JSON first
+      if (isErrorStatus || this.looksLikeJson(contentType)) {
         try {
-          const bodyJson = JSON.parse(responseBuffer.toString('utf8'));
+          const bodyText = responseBuffer.toString('utf8');
+          console.log('Response body text:', bodyText);
+          
+          const bodyJson = JSON.parse(bodyText);
           console.log('Parsed JSON response:', bodyJson);
+          
           return {
-            ok: true,
+            ok: response.status >= 200 && response.status < 300,
             meta,
             bodyJson,
           };
-        } catch (error) {
-          /* Fallback to base64 */
-          this.logger.error('Failed to parse JSON response', error);
-          throw error;
+        } catch (parseError) {
+          // If JSON parsing fails and it's an error status, log the raw response
+          if (isErrorStatus) {
+            const bodyText = responseBuffer.toString('utf8');
+            this.logger.error('Failed to parse error response as JSON', {
+              status: response.status,
+              bodyText: bodyText.substring(0, 500), // Log first 500 chars
+              parseError: parseError.message,
+            });
+            
+            // Return the raw text in bodyJson for error responses
+            return {
+              ok: false,
+              meta,
+              bodyJson: {
+                error: 'UPSTREAM_ERROR',
+                rawResponse: bodyText,
+                parseError: parseError.message,
+              },
+            };
+          }
+          
+          // For non-error responses, fallback to base64
+          this.logger.warn('Failed to parse JSON response, using base64', parseError);
         }
       }
 
       console.log('Non-JSON response, returning as base64');
       return {
-        ok: true,
+        ok: response.status >= 200 && response.status < 300,
         meta,
         bodyBase64: responseBuffer.toString('base64'),
         bodyEncoding: 'base64',

@@ -60,15 +60,36 @@ export class ForwarderClientService {
       );
       const response = await firstValueFrom(observable);
 
-      if (!response.data.ok) {
+      // Check if the forwarder itself succeeded
+      if (!response.data) {
         throw new InternalServerErrorException({
-          message: 'Forwarded request failed',
-          upstreamResponse: response.data,
+          message: 'Empty response from forwarder',
         });
+      }
+
+      // Check if the upstream request failed (ok: false or error status)
+      const upstreamStatus = response.data.meta?.status;
+      if (!response.data.ok || (upstreamStatus && upstreamStatus >= 400)) {
+        const errorDetails = {
+          message: 'Upstream API request failed',
+          upstreamStatus: upstreamStatus,
+          upstreamData: response.data.bodyJson,
+          upstreamHeaders: response.data.meta?.headers,
+        };
+
+        console.error('Upstream API Error:', errorDetails);
+
+        throw new InternalServerErrorException(errorDetails);
       }
 
       return response.data.bodyJson as T;
     } catch (error) {
+      // If it's already our custom error, re-throw it
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      // Handle axios/network errors
       const err = error as AxiosError;
       console.error(
         'Forwarder Client Error:',
