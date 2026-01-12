@@ -132,8 +132,9 @@ export class ForwarderService {
         try {
           const bodyJson = JSON.parse(responseBuffer.toString('utf8'));
           console.log('Parsed JSON response:', bodyJson);
+          const isSuccess = response.status >= 200 && response.status < 400;
           return {
-            ok: true,
+            ok: isSuccess,
             meta,
             bodyJson,
           };
@@ -147,8 +148,9 @@ export class ForwarderService {
       console.log('Non-JSON response, returning as base64');
       console.log('Response body (decoded):', responseBuffer.toString('utf8'));
 
+      const isSuccess = response.status >= 200 && response.status < 400;
       return {
-        ok: true,
+        ok: isSuccess,
         meta,
         bodyBase64: responseBuffer.toString('base64'),
         bodyEncoding: 'base64',
