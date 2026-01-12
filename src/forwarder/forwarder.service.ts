@@ -152,6 +152,8 @@ export class ForwarderService {
       }
 
       console.log('Non-JSON response, returning as base64');
+      // Log the actual body content for debugging (especially error pages)
+      console.log('Response body (decoded):', responseBuffer.toString('utf8'));
       return {
         ok: true,
         meta,
