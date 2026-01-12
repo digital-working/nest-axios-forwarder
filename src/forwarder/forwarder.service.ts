@@ -98,9 +98,16 @@ export class ForwarderService {
 
     if (payload.cert) {
       console.log('Creating HTTPS agent with certificate');
+      // Extract clean cert and key from potentially combined PEM with metadata
+      const cleanCert = this.extractCertificate(payload.cert);
+      const cleanKey = this.extractPrivateKey(payload.key || payload.cert);
+
+      console.log('Extracted cert length:', cleanCert?.length);
+      console.log('Extracted key length:', cleanKey?.length);
+
       config.httpsAgent = new https.Agent({
-        cert: payload.cert,
-        key: payload.key || payload.cert, // Use key if provided, otherwise cert contains both
+        cert: cleanCert,
+        key: cleanKey,
         rejectUnauthorized: payload.rejectUnauthorized !== false,
       });
     } else if (payload.httpsAgent) {
@@ -273,5 +280,48 @@ export class ForwarderService {
 
   private looksLikeJson(contentType?: string): boolean {
     return !!contentType && /application\/json|\+json/i.test(contentType);
+  }
+
+  /**
+   * Extract clean certificate from PEM content (removes Bag Attributes metadata)
+   */
+  private extractCertificate(pemContent: string): string | undefined {
+    if (!pemContent) return undefined;
+
+    const certMatch = pemContent.match(
+      /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/,
+    );
+
+    if (certMatch) {
+      return certMatch[0];
+    }
+
+    // If no match found, return original content
+    return pemContent;
+  }
+
+  /**
+   * Extract clean private key from PEM content (removes Bag Attributes metadata)
+   */
+  private extractPrivateKey(pemContent: string): string | undefined {
+    if (!pemContent) return undefined;
+
+    // Try to match various private key formats
+    const keyPatterns = [
+      /-----BEGIN PRIVATE KEY-----[\s\S]*?-----END PRIVATE KEY-----/,
+      /-----BEGIN RSA PRIVATE KEY-----[\s\S]*?-----END RSA PRIVATE KEY-----/,
+      /-----BEGIN EC PRIVATE KEY-----[\s\S]*?-----END EC PRIVATE KEY-----/,
+      /-----BEGIN ENCRYPTED PRIVATE KEY-----[\s\S]*?-----END ENCRYPTED PRIVATE KEY-----/,
+    ];
+
+    for (const pattern of keyPatterns) {
+      const keyMatch = pemContent.match(pattern);
+      if (keyMatch) {
+        return keyMatch[0];
+      }
+    }
+
+    // If no match found, return original content
+    return pemContent;
   }
 }
