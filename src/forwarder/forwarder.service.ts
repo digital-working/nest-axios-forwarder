@@ -131,7 +131,24 @@ export class ForwarderService {
       if (this.looksLikeJson(contentType)) {
         try {
           const bodyJson = JSON.parse(responseBuffer.toString('utf8'));
-          console.log('Parsed JSON response:', bodyJson);
+          // Log full JSON with nested objects expanded
+          console.log(
+            'Parsed JSON response:',
+            JSON.stringify(bodyJson, null, 2),
+          );
+
+          // Log specific error details if present (for APIs like HyperPay)
+          if (bodyJson?.result?.parameterErrors) {
+            console.log(
+              'Parameter Errors:',
+              JSON.stringify(bodyJson.result.parameterErrors, null, 2),
+            );
+          }
+          if (bodyJson?.result?.code) {
+            console.log('Response Code:', bodyJson.result.code);
+            console.log('Response Description:', bodyJson.result.description);
+          }
+
           const isSuccess = response.status >= 200 && response.status < 400;
           return {
             ok: isSuccess,
