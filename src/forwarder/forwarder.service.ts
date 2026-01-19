@@ -131,27 +131,9 @@ export class ForwarderService {
       if (this.looksLikeJson(contentType)) {
         try {
           const bodyJson = JSON.parse(responseBuffer.toString('utf8'));
-          // Log full JSON with nested objects expanded
-          console.log(
-            'Parsed JSON response:',
-            JSON.stringify(bodyJson, null, 2),
-          );
-
-          // Log specific error details if present (for APIs like HyperPay)
-          if (bodyJson?.result?.parameterErrors) {
-            console.log(
-              'Parameter Errors:',
-              JSON.stringify(bodyJson.result.parameterErrors, null, 2),
-            );
-          }
-          if (bodyJson?.result?.code) {
-            console.log('Response Code:', bodyJson.result.code);
-            console.log('Response Description:', bodyJson.result.description);
-          }
-
-          const isSuccess = response.status >= 200 && response.status < 400;
+          console.log('Parsed JSON response:', bodyJson);
           return {
-            ok: isSuccess,
+            ok: true,
             meta,
             bodyJson,
           };
@@ -163,11 +145,8 @@ export class ForwarderService {
       }
 
       console.log('Non-JSON response, returning as base64');
-      console.log('Response body (decoded):', responseBuffer.toString('utf8'));
-
-      const isSuccess = response.status >= 200 && response.status < 400;
       return {
-        ok: isSuccess,
+        ok: true,
         meta,
         bodyBase64: responseBuffer.toString('base64'),
         bodyEncoding: 'base64',
